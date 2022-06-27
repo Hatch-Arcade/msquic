@@ -14,6 +14,12 @@ set(QUIC_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(OPENSSL_DIR ${QUIC_BUILD_DIR}/openssl)
 option(QUIC_USE_SYSTEM_LIBCRYPTO "Use system libcrypto if openssl TLS" OFF)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+message(STATUS "* QUIC_BUILD_DIR: ${QUIC_BUILD_DIR}")
+message(STATUS "* OPENSSL_DIR: ${OPENSSL_DIR}")
+message(STATUS "* CMAKE_ANDROID_API: ${CMAKE_ANDROID_API}")
+message(STATUS "* CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
+
 # Newer versions of OpenSSL switched to Markdown, so we can use that to detect
 # the openssl version cloned
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/openssl/CHANGES")
@@ -249,8 +255,9 @@ else()
     add_custom_command(
         WORKING_DIRECTORY ${QUIC_BUILD_DIR}/submodules/openssl
         OUTPUT ${QUIC_BUILD_DIR}/submodules/openssl/Makefile
+        # need to reset DESTDIR for custom toolchain
         COMMAND SYSTEM=${CMAKE_HOST_SYSTEM_NAME}
-            ${OPENSSL_CONFIG_CMD} ${OPENSSL_CONFIG_FLAGS}
+            ${OPENSSL_CONFIG_CMD} ${OPENSSL_CONFIG_FLAGS} DESTDIR=
         COMMENT "OpenSSL configure"
     )
 
@@ -263,7 +270,8 @@ else()
         OUTPUT ${LIBCRYPTO_PATH}
         DEPENDS ${QUIC_BUILD_DIR}/submodules/openssl/Makefile
         WORKING_DIRECTORY ${QUIC_BUILD_DIR}/submodules/openssl
-        COMMAND make install_dev -j${NPROCS}
+        # need to reset DESTDIR for custom toolchain
+        COMMAND make DESTDIR= install_dev -j${NPROCS}
         COMMENT "OpenSSL build"
     )
 

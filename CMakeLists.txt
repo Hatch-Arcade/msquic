@@ -7,6 +7,12 @@ else()
     cmake_minimum_required(VERSION 3.16)
 endif()
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+message(STATUS "* QUIC_BUILD_DIR: ${QUIC_BUILD_DIR}")
+message(STATUS "* CMAKE_ANDROID_API: ${CMAKE_ANDROID_API}")
+message(STATUS "* CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
+message(STATUS "* DESTDIR: ${DESTDIR}")
+
 # Disable in-source builds to prevent source tree corruption.
 if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(FATAL_ERROR "
@@ -35,6 +41,7 @@ endif()
 
 if (POLICY CMP0111)
     cmake_policy(SET CMP0111 NEW)
+    message(STATUS "* Setting policy 0111")
 endif()
 
 project(msquic)
@@ -159,6 +166,7 @@ if (QUIC_SOURCE_LINK AND MSVC)
 endif()
 
 set(QUIC_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
+message(STATUS "Set QUIC_BUILD_DIR to CMAKE_CURRENT_BINARY_DIR: ${QUIC_BUILD_DIR}")
 set(QUIC_OUTPUT_DIR ${QUIC_BUILD_DIR}/bin/$<IF:$<CONFIG:Debug>,Debug,Release> CACHE STRING "Output directory for build artifacts")
 
 string(GENEX_STRIP ${QUIC_OUTPUT_DIR} QUIC_OUTPUT_DIR_STRIPPED)
@@ -292,8 +300,10 @@ else()
     if (HAS_SYSCTL)
          list(APPEND QUIC_COMMON_DEFINES HAS_SYSCTL)
     endif()
+    # need -Wno-atomic-alignment (clang build with -Werror)
     set(QUIC_WARNING_FLAGS -Werror -Wall -Wextra -Wformat=2 -Wno-type-limits
         -Wno-unknown-pragmas -Wno-multichar -Wno-missing-field-initializers
+        -Wno-atomic-alignment
         CACHE INTERNAL "")
     if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0)
         list(APPEND QUIC_WARNING_FLAGS -Wno-strict-aliasing)
