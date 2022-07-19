@@ -258,6 +258,10 @@ else()
 endif()
 
 set(PUBLIC_HEADERS
+    # Added C++ wrapper and the private header required for it (not originally part of public headers)
+    ../inc/msquic.hpp
+    ../inc/msquicp.h
+
     ../inc/msquic.h
     ../inc/msquic_winuser.h
     ../inc/msquic_posix.h
